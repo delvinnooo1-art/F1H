@@ -42,7 +42,11 @@ import { FeaturedNews } from "./components/FeaturedNews.tsx";
 import { TechInsights } from "./components/TechInsights.tsx";
 import { NewsList } from "./components/NewsList.tsx";
 import { TelemetryDashboard } from "./components/TelemetryDashboard.tsx";
-import { LayoutGrid, List, BarChart2, Settings, MessageSquare, BookOpen, Cpu, ArrowUpRight, Activity, Radio, Trophy, Globe, ShieldAlert, Cpu as Engine, ChevronRight } from "lucide-react";
+import { DriverComparison } from "./components/DriverComparison.tsx";
+import { GridSimulation } from "./components/GridSimulation.tsx";
+import { SectorAnalysis } from "./components/SectorAnalysis.tsx";
+import { MediaPipelinePanel } from "./components/MediaPipelinePanel.tsx";
+import { LayoutGrid, List, BarChart2, Settings, MessageSquare, BookOpen, Cpu, ArrowUpRight, Activity, Radio, Trophy, Globe, ShieldAlert, Cpu as Engine, ChevronRight, ArrowLeftRight, Flag, Database } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { getTrackMapUrl } from "./services/assetManager.ts";
 import { getDriverPortrait } from "./services/driverPhotos";
@@ -67,7 +71,7 @@ export default function App() {
   const [standingsType, setStandingsType] = useState<"drivers" | "constructors">("drivers");
   
   // UI States
-  const [activeTab, setActiveTab] = useState<"dashboard" | "standings" | "telemetry" | "news" | "guide" | "cars">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "standings" | "telemetry" | "news" | "guide" | "cars" | "compare" | "grid" | "sectors" | "media">("dashboard");
   const [activeTelemetryDrivers, setActiveTelemetryDrivers] = useState<number[]>([1, 44]); // Default to Max and Lewis/Placeholder 2026 numbers
   const [fastestLapDriver, setFastestLapDriver] = useState<Driver | null>(null);
   const [fastestLapData, setFastestLapData] = useState<Lap | null>(null);
@@ -599,43 +603,71 @@ export default function App() {
                 <CarUpdates drivers={Object.values(drivers)} latestLaps={laps} currentStints={stints} positions={positions} />
               </motion.div>
             )}
+
+            {activeTab === "compare" && (
+              <motion.div key="compare" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="h-full overflow-y-auto custom-scrollbar pr-2">
+                <DriverComparison initialDrivers={activeTelemetryDrivers} />
+              </motion.div>
+            )}
+
+            {activeTab === "grid" && (
+              <motion.div key="grid" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="h-full flex flex-col">
+                <GridSimulation circuit="default" totalLaps={57} />
+              </motion.div>
+            )}
+
+            {activeTab === "sectors" && (
+              <motion.div key="sectors" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="h-full overflow-y-auto custom-scrollbar pr-2">
+                <SectorAnalysis driverNumbers={activeTelemetryDrivers.slice(0, 4)} />
+              </motion.div>
+            )}
+
+            {activeTab === "media" && (
+              <motion.div key="media" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="h-full flex flex-col">
+                <MediaPipelinePanel />
+              </motion.div>
+            )}
           </AnimatePresence>
         </section>
       </main>
 
-      {/* Futuristic Floating Navigation Dock */}
-      <nav className="fixed bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 w-[98%] md:w-[95%] max-w-3xl h-16 md:h-18 bg-f1-dark/80 backdrop-blur-3xl border border-white/5 z-50 rounded-[2rem] flex items-center justify-start md:justify-around px-2 md:px-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] overflow-x-auto no-scrollbar">
+      {/* Floating Navigation Dock */}
+      <nav className="fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 w-[99%] max-w-5xl bg-f1-dark/85 backdrop-blur-3xl border border-white/5 z-50 rounded-[2rem] flex items-center px-2 md:px-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.9)] overflow-x-auto no-scrollbar h-16">
         {/* Animated Accent Bar */}
-        <motion.div 
+        <motion.div
           layoutId="dock-shine"
           className="absolute -top-[1px] h-[1px] bg-gradient-to-r from-transparent via-f1-red to-transparent z-10"
-          style={{ width: '20%' }}
+          style={{ width: '15%' }}
         />
-        
+
         {[
-          { id: "dashboard", label: "LIVE TIMING", icon: <LayoutGrid size={22} /> },
-          { id: "standings", label: "STANDINGS", icon: <Trophy size={22} /> },
-          { id: "telemetry", label: "TELEMETRY", icon: <BarChart2 size={22} /> },
-          { id: "news", label: "TRACK VIEW", icon: <Globe size={22} /> },
-          { id: "cars", label: "ENGINE", icon: <Engine size={22} /> },
-          { id: "guide", label: "GUIDE", icon: <BookOpen size={22} /> }
+          { id: "dashboard", label: "TIMING", icon: <LayoutGrid size={20} /> },
+          { id: "standings", label: "POINTS", icon: <Trophy size={20} /> },
+          { id: "compare", label: "COMPARE", icon: <ArrowLeftRight size={20} /> },
+          { id: "grid", label: "GRID SIM", icon: <Flag size={20} /> },
+          { id: "sectors", label: "SECTORS", icon: <Activity size={20} /> },
+          { id: "telemetry", label: "TELEMETRY", icon: <BarChart2 size={20} /> },
+          { id: "news", label: "NEWS", icon: <Globe size={20} /> },
+          { id: "cars", label: "CARS", icon: <Engine size={20} /> },
+          { id: "media", label: "PIPELINE", icon: <Database size={20} /> },
+          { id: "guide", label: "GUIDE", icon: <BookOpen size={20} /> },
         ].map((tab) => (
-          <button 
+          <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`relative flex flex-col items-center justify-center gap-1 transition-all duration-500 py-1 min-w-[70px] md:min-w-[80px] flex-1 ${activeTab === tab.id ? 'text-f1-red' : 'text-white/20 hover:text-white/40'}`}
+            className={`relative flex flex-col items-center justify-center gap-0.5 transition-all duration-500 py-1 min-w-[60px] flex-1 ${activeTab === tab.id ? 'text-f1-red' : 'text-white/20 hover:text-white/40'}`}
           >
-            <motion.div 
-              animate={activeTab === tab.id ? { y: -2, scale: 1.1 } : { y: 0, scale: 1 }}
+            <motion.div
+              animate={activeTab === tab.id ? { y: -1, scale: 1.1 } : { y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               {tab.icon}
             </motion.div>
-            <span className={`text-[8px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] italic ${activeTab === tab.id ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}>
+            <span className={`text-[7px] font-black uppercase tracking-[0.05em] italic ${activeTab === tab.id ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 whitespace-nowrap`}>
               {tab.label}
             </span>
             {activeTab === tab.id && (
-              <motion.div 
+              <motion.div
                 layoutId="nav-glow"
                 className="absolute inset-0 bg-f1-red/5 rounded-full blur-xl z-[-1]"
               />
